@@ -1,0 +1,565 @@
+[
+    {
+        "id": "8c3e9d317b1b3a9d",
+        "type": "tab",
+        "label": "アレクサからUiPathへの連携",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f9f4445f3970cc3c",
+        "type": "inject",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 90,
+        "y": 160,
+        "wires": [
+            [
+                "cda4cb22c034c749"
+            ]
+        ]
+    },
+    {
+        "id": "4e268a44b7d3155f",
+        "type": "http request",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://account.uipath.com/oauth/token",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "credentials": {},
+        "x": 870,
+        "y": 100,
+        "wires": [
+            [
+                "af3e24d9f91ed6bd"
+            ]
+        ]
+    },
+    {
+        "id": "50707ed1c387d6b3",
+        "type": "function",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "Auth request",
+        "func": "var client_id = 'クライアントキー'\nvar user_key = 'ユーザーキー'\n\n\nmsg.headers = {}\nmsg.headers['content-type'] = 'application/json'\n\nmsg.payload = {\n  \"grant_type\": \"refresh_token\",\n  \"client_id\": client_id,\n  \"refresh_token\": user_key\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 100,
+        "wires": [
+            [
+                "4e268a44b7d3155f"
+            ]
+        ]
+    },
+    {
+        "id": "af3e24d9f91ed6bd",
+        "type": "json",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 1030,
+        "y": 100,
+        "wires": [
+            [
+                "46a36d646c982e96"
+            ]
+        ]
+    },
+    {
+        "id": "aa6b3a0bb68ac10c",
+        "type": "http request",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://cloud.uipath.com/uipath_nakamura/MyAutomation/orchestrator_/odata/Jobs/UiPath.Server.Configuration.OData.StartJobs",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "credentials": {},
+        "x": 870,
+        "y": 200,
+        "wires": [
+            [
+                "f212d5303e2242a3"
+            ]
+        ]
+    },
+    {
+        "id": "4847f772c0c8f8db",
+        "type": "debug",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.value[0].State",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1280,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "f324215ca5a1c434",
+        "type": "alexa-home",
+        "z": "8c3e9d317b1b3a9d",
+        "conf": "07856abab19def03",
+        "device": "172985",
+        "acknoledge": true,
+        "name": "ラズパイ",
+        "topic": "",
+        "x": 80,
+        "y": 80,
+        "wires": [
+            [
+                "cda4cb22c034c749"
+            ]
+        ]
+    },
+    {
+        "id": "cda4cb22c034c749",
+        "type": "switch",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "パラメータ",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 230,
+        "y": 120,
+        "wires": [
+            [
+                "f0d6055e29c8cd94"
+            ],
+            [
+                "81cb150f2ac4d398"
+            ],
+            [
+                "fef4d4f9cb26be4b"
+            ]
+        ]
+    },
+    {
+        "id": "af8ea5844916cc59",
+        "type": "function",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "StartJob request",
+        "func": "var tenant_name = flow.get('tenant_name')\nvar unit_id = flow.get('unit_id')\nvar release_key = flow.get('release_key')\nvar access_token = flow.get('access_token')\n\nmsg.headers = {}\nmsg.headers['content-type'] = 'application/json'\nmsg.headers['Authorization'] = 'Bearer ' + access_token\nmsg.headers['X-UIPATH-TenantName'] = tenant_name\nmsg.headers['X-UIPATH-OrganizationUnitId'] = unit_id\n\nmsg.payload = {\n  \"startInfo\": {\n    \"ReleaseKey\": release_key,\n    \"RobotIds\": [],\n    \"JobsCount\": 1,\n    \"JobPriority\": \"Normal\",\n    \"Strategy\": \"ModernJobsCount\",\n    \"RuntimeType\": \"Unattended\",\n    \"InputArguments\": \"{}\"}\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 200,
+        "wires": [
+            [
+                "aa6b3a0bb68ac10c"
+            ]
+        ]
+    },
+    {
+        "id": "f0d6055e29c8cd94",
+        "type": "function",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "楽天で歯ブラシを購入して",
+        "func": "flow.set('tenant_name', 'MyAutomation')\nflow.set('unit_id', '280591')\nflow.set('release_key', '68b66d2f-7a20-470f-ba70-dda76fd78525')\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 60,
+        "wires": [
+            [
+                "50707ed1c387d6b3"
+            ]
+        ]
+    },
+    {
+        "id": "81cb150f2ac4d398",
+        "type": "function",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "楽天でシャンプーを購入して",
+        "func": "flow.set('tenant_name', 'MyAutomation')\nflow.set('unit_id', '280591')\nflow.set('release_key', '68b66d2f-7a20-470f-ba70-dda76fd78525')\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 100,
+        "wires": [
+            [
+                "50707ed1c387d6b3"
+            ]
+        ]
+    },
+    {
+        "id": "fef4d4f9cb26be4b",
+        "type": "function",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "楽天で洗剤を購入して",
+        "func": "flow.set('tenant_name', 'MyAutomation')\nflow.set('unit_id', '280591')\nflow.set('release_key', '9b14912e-d870-43ee-8f22-554a4af1c5c9')\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 140,
+        "wires": [
+            [
+                "50707ed1c387d6b3"
+            ]
+        ]
+    },
+    {
+        "id": "f212d5303e2242a3",
+        "type": "json",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 1030,
+        "y": 200,
+        "wires": [
+            [
+                "7849913ee402d7ba"
+            ]
+        ]
+    },
+    {
+        "id": "e7fee9af3bf49123",
+        "type": "function",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "GetJob request",
+        "func": "var tenant_name = flow.get('tenant_name')\nvar unit_id = flow.get('unit_id')\nvar access_token = flow.get('access_token')\nvar query = encodeURI(\"$filter=Id eq \"+msg.payload.value[0].Id)\n\nvar post_request = {\n    \"url\":\"https://cloud.uipath.com/uipath_nakamura/MyAutomation/orchestrator_/odata/Jobs?\" + query,\n    \"headers\": {\n        \"content-type\":'application/json',\n        \"Authorization\":'Bearer ' + access_token,\n        \"X-UIPATH-TenantName\":tenant_name,\n        \"X-UIPATH-OrganizationUnitId\":unit_id\n    }\n};\n\n\nreturn post_request;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 300,
+        "wires": [
+            [
+                "3c29471699ea724f"
+            ]
+        ]
+    },
+    {
+        "id": "3c29471699ea724f",
+        "type": "http request",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "credentials": {},
+        "x": 870,
+        "y": 300,
+        "wires": [
+            [
+                "b57407aa63376fc3"
+            ]
+        ]
+    },
+    {
+        "id": "46a36d646c982e96",
+        "type": "function",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "Save access token",
+        "func": "flow.set('access_token', msg.payload.access_token)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1210,
+        "y": 100,
+        "wires": [
+            [
+                "af8ea5844916cc59"
+            ]
+        ]
+    },
+    {
+        "id": "38f50d05700ac8cf",
+        "type": "comment",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "認証",
+        "info": "",
+        "x": 670,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "2d63914779cb28a0",
+        "type": "comment",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "ジョブの開始",
+        "info": "",
+        "x": 690,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "b28fd96a4a8e5ad9",
+        "type": "comment",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "ジョブの結果取得",
+        "info": "",
+        "x": 710,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "7849913ee402d7ba",
+        "type": "delay",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "3",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1220,
+        "y": 200,
+        "wires": [
+            [
+                "e7fee9af3bf49123"
+            ]
+        ]
+    },
+    {
+        "id": "69d7612accbcd9fa",
+        "type": "switch",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "パラメータ",
+        "property": "payload.value[0].State",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Running",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Successful",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 1050,
+        "y": 380,
+        "wires": [
+            [
+                "7849913ee402d7ba"
+            ],
+            [
+                "410019b20888f4f1"
+            ],
+            [
+                "1470800eed74c6bf"
+            ]
+        ]
+    },
+    {
+        "id": "410019b20888f4f1",
+        "type": "alexa-remote-routine",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "アレクサ成功通知",
+        "account": "870336eb30f4b4f2",
+        "routineNode": {
+            "type": "speak",
+            "payload": {
+                "type": "regular",
+                "text": {
+                    "type": "str",
+                    "value": "\"購入しました\""
+                },
+                "devices": [
+                    "G090U509915525TE"
+                ]
+            }
+        },
+        "x": 1250,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1470800eed74c6bf",
+        "type": "alexa-remote-routine",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "アレクサ失敗通知",
+        "account": "870336eb30f4b4f2",
+        "routineNode": {
+            "type": "speak",
+            "payload": {
+                "type": "regular",
+                "text": {
+                    "type": "str",
+                    "value": "\"購入できませんでした"
+                },
+                "devices": [
+                    "G090U509915525TE"
+                ]
+            }
+        },
+        "x": 1250,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b57407aa63376fc3",
+        "type": "json",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 1030,
+        "y": 300,
+        "wires": [
+            [
+                "69d7612accbcd9fa",
+                "4847f772c0c8f8db"
+            ]
+        ]
+    },
+    {
+        "id": "2aac14885ddcee4f",
+        "type": "comment",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "アレクサの定形アクション受信時",
+        "info": "",
+        "x": 150,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "015a98d58cb43461",
+        "type": "comment",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "デバイスに付与される%で条件分岐",
+        "info": "",
+        "x": 300,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "05015ab3a4ebd36c",
+        "type": "comment",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "Release Key等の設定",
+        "info": "",
+        "x": 440,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "5c0b3a5b30a32593",
+        "type": "comment",
+        "z": "8c3e9d317b1b3a9d",
+        "name": "実行中は再度確認",
+        "info": "",
+        "x": 1030,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "07856abab19def03",
+        "type": "alexa-home-conf",
+        "username": "manabutech",
+        "credentials": {}
+    },
+    {
+        "id": "870336eb30f4b4f2",
+        "type": "alexa-remote-account",
+        "name": "",
+        "authMethod": "proxy",
+        "proxyOwnIp": "192.168.2.163",
+        "proxyPort": "3456",
+        "cookieFile": "",
+        "refreshInterval": "3",
+        "alexaServiceHost": "alexa.amazon.co.jp",
+        "amazonPage": "amazon.co.jp",
+        "acceptLanguage": "ja_JP",
+        "userAgent": "",
+        "useWsMqtt": "on",
+        "autoInit": "on"
+    }
+]
